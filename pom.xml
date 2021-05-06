@@ -26,6 +26,7 @@
                 <version>2.4</version>
                 <executions>
                     <execution>
+                        <id>pre_install_registry_jar</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
@@ -38,6 +39,20 @@
                             <file>${basedir}/lib/registry-3.1.3.jar</file>
                         </configuration>
                     </execution>
+<!--                    <execution>
+                        <id>pre_install_registry_dll</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>com.ice.jni</groupId>
+                            <artifactId>ICE_JNIRegistry</artifactId>
+                            <version>3.1.3</version>
+                            <packaging>dll</packaging>
+                            <file>${basedir}/lib/ICE_JNIRegistry.dll</file>
+                        </configuration>
+                    </execution>-->
                 </executions>
             </plugin>
         </plugins>
