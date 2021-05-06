@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Install local dependencies</actionName>
+            <displayName>Install local dependencies</displayName>
+            <goals>
+                <goal>initialize</goal>
+            </goals>
+        </action>
+    </actions>
