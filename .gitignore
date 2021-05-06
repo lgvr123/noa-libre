@@ -2,3 +2,5 @@
 /dist/
 /manifest.mf
 *~
+/nbproject/private/
+/target/
