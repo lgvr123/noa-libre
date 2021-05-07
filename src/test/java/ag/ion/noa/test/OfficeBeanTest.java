@@ -47,6 +47,10 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +60,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import junit.framework.TestCase;
 
@@ -67,163 +72,191 @@ import junit.framework.TestCase;
  */
 public class OfficeBeanTest extends TestCase {
 
-   private static Logger LOGGER = Logger.getLogger("ag.ion");
+    private static Logger LOGGER = Logger.getLogger("ag.ion");
 
-   private IDocument document = null;
-   private File file = null;
+    private IDocument document = null;
+    private File file = null;
 
-   //----------------------------------------------------------------------------
-   /**
-    * Main entry point for the OpenOffice.org Bean Test.
-    *
-    * @param args arguments of the test
-    *
-    * @author Andreas Bröker
-    * @date 21.05.2006
-    */
-   public static void main(String[] args) throws OfficeApplicationException {
+    //----------------------------------------------------------------------------
+    /**
+     * Main entry point for the OpenOffice.org Bean Test.
+     *
+     * @param args arguments of the test
+     *
+     * @author Andreas Bröker
+     * @date 21.05.2006
+     */
+    public static void main(String[] args) throws OfficeApplicationException {
 
-      LogManager.getLogManager().reset();
-      ConsoleHandler consoleHandler = new ConsoleHandler();
-      consoleHandler.setLevel(Level.FINEST);
-      LOGGER.addHandler(consoleHandler);
-      LOGGER.setLevel(Level.FINEST);
+        LogManager.getLogManager().reset();
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.FINEST);
+        LOGGER.addHandler(consoleHandler);
+        LOGGER.setLevel(Level.FINEST);
 
-      try {
-         FileHandler fileHandler = new FileHandler("log.xml");
-         fileHandler.setLevel(Level.FINEST);
-         LOGGER.addHandler(fileHandler);
-      } catch (Throwable throwable) {
-      }
-      OfficeBeanTest testOfficeBean = new OfficeBeanTest();
+        try {
+            FileHandler fileHandler = new FileHandler("log.xml");
+            fileHandler.setLevel(Level.FINEST);
+            LOGGER.addHandler(fileHandler);
+        } catch (Throwable throwable) {
+        }
+        OfficeBeanTest testOfficeBean = new OfficeBeanTest();
 
-      if (args.length == 0) {
-         testOfficeBean.test(null);
-      }else if (args.length == 1) {
-         testOfficeBean.test(args[0]);
-      }else if(args.length==4){
-         testOfficeBean.remoteTestPDF(new File(args[2]), new File(args[3]), args[0], Integer.valueOf(args[1]));
-      }else{
-         System.out.println("usage:\nOfficeBeanTest host port source-odt target-pdf\nOfficeBeanTest officeHome");
-      }
-   }
-   //----------------------------------------------------------------------------
-   /**
-    * Test OpenOffice.org Bean.
-    *
-    * @author Andreas Bröker
-    * @param home
-    * @throws ag.ion.bion.officelayer.application.OfficeApplicationException
-    * @date 21.05.2006
-    */
-   public void testOfficeBean(String home) throws OfficeApplicationException {
-      OfficeBeanTest testOfficeBean = new OfficeBeanTest();
-      System.out.println("testOfficeBean: " + home);
-      testOfficeBean.test(home);
-   }
+        if (args.length == 0) {
+            testOfficeBean.test(null);
+        }
+        else if (args.length == 1) {
+            testOfficeBean.test(args[0]);
+        }
+        else if (args.length == 4) {
+            testOfficeBean.remoteTestPDF(new File(args[2]), new File(args[3]), args[0], Integer.valueOf(args[1]));
+        }
+        else {
+            System.out.println("usage:\nOfficeBeanTest host port source-odt target-pdf\nOfficeBeanTest officeHome");
+        }
+    }
+    //----------------------------------------------------------------------------
 
-   public void remoteTestPDF(File source, File target, String host, int port) {
-      Map<String, String> configuration = new HashMap<String, String>();
-      configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.REMOTE_APPLICATION);
-      configuration.put(IOfficeApplication.APPLICATION_HOST_KEY, host.replace("http://", ""));
-      configuration.put(IOfficeApplication.APPLICATION_PORT_KEY, String.valueOf(port));
-      configuration.put(IOfficeApplication.APPLICATION_ARGUMENTS_KEY, String.valueOf(port));
-      System.out.println("Office host: " + host);
+    /**
+     * Test OpenOffice.org Bean.
+     *
+     * @author Andreas Bröker
+     * @param home
+     *
+     * @throws ag.ion.bion.officelayer.application.OfficeApplicationException
+     * @date 21.05.2006
+     */
+    public void testOfficeBean(String home) throws OfficeApplicationException {
+        OfficeBeanTest testOfficeBean = new OfficeBeanTest();
+        System.out.println("testOfficeBean: " + home);
+        testOfficeBean.test(home);
+    }
 
-      try {
-         System.out.println("Activating OpenOffice.org connection ...");
-         final IOfficeApplication application = OfficeApplicationRuntime.getApplication(configuration);
-         application.activate();
+    public void remoteTestPDF(File source, File target, String host, int port) {
+        Map<String, String> configuration = new HashMap<String, String>();
+        configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.REMOTE_APPLICATION);
+        configuration.put(IOfficeApplication.APPLICATION_HOST_KEY, host.replace("http://", ""));
+        configuration.put(IOfficeApplication.APPLICATION_PORT_KEY, String.valueOf(port));
+        configuration.put(IOfficeApplication.APPLICATION_ARGUMENTS_KEY, String.valueOf(port));
+        System.out.println("Office host: " + host);
 
-         System.out.println("Document stream to pdf..");
-         application.getDocumentService().loadDocument(source.getAbsolutePath()).getPersistenceService().export(new FileOutputStream(target), PDFFilter.FILTER);
-         System.out.println("Document export to pdf done. " + target.getCanonicalPath());
+        try {
+            System.out.println("Activating OpenOffice.org connection ...");
+            final IOfficeApplication application = OfficeApplicationRuntime.getApplication(configuration);
+            application.activate();
 
-         document.close();
-         if (document.isOpen()) {
+            System.out.println("Document stream to pdf..");
+            application.getDocumentService().loadDocument(source.getAbsolutePath()).getPersistenceService().export(new FileOutputStream(target), PDFFilter.FILTER);
+            System.out.println("Document export to pdf done. " + target.getCanonicalPath());
+
             document.close();
-         }
-         try {
-            System.out.println("Deactivating Office connection ...");
-            application.deactivate();
-         } catch (OfficeApplicationException applicationException) {
-         }
-      } catch (Throwable throwable) {
-         throwable.printStackTrace();
-         fail(throwable.getMessage());
-      }
-      System.out.println("NOA Office Bean Test successfully.");
-   }
-   //----------------------------------------------------------------------------
-   /**
-    * Test the OpenOffice.org Bean by creating an empty odt file, opening it,
-    * creating a pdf and cleanup
-    *
-    * @param officeHome home path to OpenOffice.org
-    *
-    * @author Andreas Bröker
-    * @date 21.05.2006
-    */
-   public void test(String officeHome) throws OfficeApplicationException {
-      System.out.println("NOA Office Bean Test");
-
-      if (officeHome == null) {
-         IApplicationAssistant applicationAssistant = new ApplicationAssistant();
-         ILazyApplicationInfo appInfo = applicationAssistant.getLatestLocalOpenOfficeOrgApplication();
-         if (appInfo == null) {
-            appInfo = applicationAssistant.getLatestLocalLibreOfficeApplication();
-         }
-         if (appInfo == null) {
-            throw new IllegalStateException("No OO/LO found.");
-         }
-         System.out.println(appInfo.getClass() + " - Office major version:" + appInfo.getMajorVersion());
-
-         officeHome = appInfo.getHome();
-      }
-      System.out.println("Office home: " + officeHome);
-      HashMap hashMap = new HashMap(2);
-      hashMap.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
-      hashMap.put(IOfficeApplication.APPLICATION_HOME_KEY, officeHome);
-
-      try {
-         System.out.println("Activating OpenOffice.org connection ...");
-         final IOfficeApplication application = OfficeApplicationRuntime.getApplication(hashMap);
-         application.activate();
-         final Frame frame = new Frame();
-         frame.setVisible(true);
-         frame.setSize(400, 400);
-         frame.validate();
-         Panel panel = new Panel(new BorderLayout());
-         frame.add(panel);
-         panel.setVisible(true);
-         frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-               frame.dispose();
-               document.close();
-               file.delete();
-               try {
-                  System.out.println("Deactivating OpenOffice.org connection ...");
-                  application.deactivate();
-               } catch (OfficeApplicationException applicationException) {
-               }
+            if (document.isOpen()) {
+                document.close();
             }
-         });
+            try {
+                System.out.println("Deactivating Office connection ...");
+                application.deactivate();
+            } catch (OfficeApplicationException applicationException) {
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            fail(throwable.getMessage());
+        }
+        System.out.println("NOA Office Bean Test successfully.");
+    }
+    //----------------------------------------------------------------------------
 
-         System.out.println("Constructing document for test ...");
-         IFrame officeFrame = application.getDesktopService().constructNewOfficeFrame(panel);
-         document = application.getDocumentService().constructNewHiddenDocument(IDocument.WRITER);
-         System.out.println("Document for test constructed.");
-         file = new File("OfficeBeanTest.odt");
-         document.getPersistenceService().store(new FileOutputStream(file));
-         document.close();
-         System.out.println("Loading document for test ...");
-         document = application.getDocumentService().loadDocument(officeFrame, new FileInputStream(file), new DocumentDescriptor());
-         System.out.println("Document for test loaded.");
+    /**
+     * Test the OpenOffice.org Bean by creating an empty odt file, opening it,
+     * creating a pdf and cleanup
+     *
+     * @param officeHome home path to OpenOffice.org
+     *
+     * @author Andreas Bröker
+     * @date 21.05.2006
+     */
+    public void test(String officeHome) throws OfficeApplicationException {
+        System.out.println("NOA Office Bean Test");
 
-         System.out.println("Document export to pdf..");
-         PDFFilter pdfFilter = PDFFilter.FILTER;
-         File pdf = new File("OfficeBeanTestPdfa.pdf");
-         pdf.delete();
+        // print class path where dll & co will be searzched
+        System.out.println("--We are running in--");
+        final File root = new File(ApplicationAssistant.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        System.out.println(root);
+        
+        System.out.println("--Library Path--");
+        String paths = System.getProperty("java.library.path");
+//        paths=paths+File.pathSeparator+root.getPath();
+//        System.setProperty("java.library.path",paths);
+//        paths = System.getProperty("java.library.path");
+        Stream.of(paths.split(File.pathSeparator)).forEach(p->System.out.println(p));
+
+        System.out.println("--Class Path--");
+        paths = System.getProperty("java.class.path");
+        Stream.of(paths.split(File.pathSeparator)).forEach(p->System.out.println(p));
+        
+//        final String icedll = root + File.separator + "ICE_JNIRegistry.dll";
+        final String icedll = root + File.separator + "64bit" + File.separator + "ICE_JNIRegistry.dll";
+        System.out.println(icedll);
+        System.load(icedll);
+        
+
+        if (officeHome == null) {
+            IApplicationAssistant applicationAssistant = new ApplicationAssistant();
+            ILazyApplicationInfo appInfo = applicationAssistant.getLatestLocalOpenOfficeOrgApplication();
+            if (appInfo == null) {
+                appInfo = applicationAssistant.getLatestLocalLibreOfficeApplication();
+            }
+            if (appInfo == null) {
+                throw new IllegalStateException("No OO/LO found.");
+            }
+            System.out.println(appInfo.getClass() + " - Office major version:" + appInfo.getMajorVersion());
+
+            officeHome = appInfo.getHome();
+        }
+        System.out.println("Office home: " + officeHome);
+        HashMap hashMap = new HashMap(2);
+        hashMap.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
+        hashMap.put(IOfficeApplication.APPLICATION_HOME_KEY, officeHome);
+
+        try {
+            System.out.println("Activating OpenOffice.org connection ...");
+            final IOfficeApplication application = OfficeApplicationRuntime.getApplication(hashMap);
+            application.activate();
+            final Frame frame = new Frame();
+            frame.setVisible(true);
+            frame.setSize(400, 400);
+            frame.validate();
+            Panel panel = new Panel(new BorderLayout());
+            frame.add(panel);
+            panel.setVisible(true);
+            frame.addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    frame.dispose();
+                    document.close();
+                    file.delete();
+                    try {
+                        System.out.println("Deactivating OpenOffice.org connection ...");
+                        application.deactivate();
+                    } catch (OfficeApplicationException applicationException) {
+                    }
+                }
+            });
+
+            System.out.println("Constructing document for test ...");
+            IFrame officeFrame = application.getDesktopService().constructNewOfficeFrame(panel);
+            document = application.getDocumentService().constructNewHiddenDocument(IDocument.WRITER);
+            System.out.println("Document for test constructed.");
+            file = new File("OfficeBeanTest.odt");
+            document.getPersistenceService().store(new FileOutputStream(file));
+            document.close();
+            System.out.println("Loading document for test ...");
+            document = application.getDocumentService().loadDocument(officeFrame, new FileInputStream(file), new DocumentDescriptor());
+            System.out.println("Document for test loaded.");
+
+            System.out.println("Document export to pdf..");
+            PDFFilter pdfFilter = PDFFilter.FILTER;
+            File pdf = new File("OfficeBeanTestPdfa.pdf");
+            pdf.delete();
 //FIXME commented out is special for pdf/A, will become part of noalibre 
 //         PropertyValue[] filterData = new PropertyValue[1];
 //         filterData[0] = new PropertyValue();
@@ -243,30 +276,30 @@ public class OfficeBeanTest extends TestCase {
 //         URL url = pdf.toURI().toURL();
 //         XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, document.getXComponent());
 //         xStorable.storeToURL(url.toString(), properties);
-         application.getDocumentService().loadDocument(file.getAbsolutePath()).getPersistenceService().export(pdf.getAbsolutePath(), pdfFilter);
-         System.out.println("Document export to pdf done. " + pdf.getCanonicalPath());
+            application.getDocumentService().loadDocument(file.getAbsolutePath()).getPersistenceService().export(pdf.getAbsolutePath(), pdfFilter);
+            System.out.println("Document export to pdf done. " + pdf.getCanonicalPath());
 
-         frame.validate();
-         officeFrame.getXFrame().getController().suspend(true);
-         document.close();
-
-         frame.dispose();
-         if (document.isOpen()) {
+            frame.validate();
+            officeFrame.getXFrame().getController().suspend(true);
             document.close();
-         }
-         file.delete();
-         pdf.delete();
-         try {
-            System.out.println("Deactivating Office connection ...");
-            application.deactivate();
-         } catch (OfficeApplicationException applicationException) {
-         }
-      } catch (Throwable throwable) {
-         throwable.printStackTrace();
-         fail(throwable.getMessage());
-      }
-      System.out.println("NOA Office Bean Test successfully.");
-   }
-   //----------------------------------------------------------------------------
+
+            frame.dispose();
+            if (document.isOpen()) {
+                document.close();
+            }
+            file.delete();
+            pdf.delete();
+            try {
+                System.out.println("Deactivating Office connection ...");
+                application.deactivate();
+            } catch (OfficeApplicationException applicationException) {
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            fail(throwable.getMessage());
+        }
+        System.out.println("NOA Office Bean Test successfully.");
+    }
+    //----------------------------------------------------------------------------
 
 }

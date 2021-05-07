@@ -40,9 +40,6 @@ import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.runtime.IOfficeProgressMonitor;
 
-import com.ice.jni.registry.NoSuchValueException;
-import com.ice.jni.registry.Registry;
-import com.ice.jni.registry.RegistryKey;
 import java.io.IOException;
 
 /**
