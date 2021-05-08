@@ -404,7 +404,7 @@ public class LocalOfficeConnection extends AbstractOfficeConnection {
                 // Get where we are running
                 final File root = new File(LocalOfficeConnection.class.getProtectionDomain().getCodeSource().getLocation().getPath());
                 //final NativeView nativeView = new NativeView(System.getProperty("user.dir")+"/lib");
-                final NativeView nativeView = new NativeView(root.getPath() + File.separator + "lib");
+                final NativeView nativeView = new NativeView();
                 container.add(nativeView);
                 return getOfficeFrame(nativeView);
             } catch (Exception exception) {
