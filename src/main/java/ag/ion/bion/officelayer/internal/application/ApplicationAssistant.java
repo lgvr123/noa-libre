@@ -39,6 +39,7 @@ import ag.ion.bion.officelayer.application.ILazyApplicationInfo;
 import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.runtime.IOfficeProgressMonitor;
+import com.zparkingb.utils.WinRegistryHelper;
 
 import java.io.IOException;
 
@@ -67,7 +68,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * Constructs new ApplicationAssistant.
      *
      * @throws OfficeApplicationException if the office application assitant can
-     * not be constructed
+     *                                    not be constructed
      *
      * @author Andreas Bröker
      */
@@ -82,38 +83,12 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * @param nativeLibPath path to the ICE registry library
      *
      * @throws OfficeApplicationException if the office application assitant can
-     * not be constructed
+     *                                    not be constructed
      *
      * @author Andreas Bröker
      */
     public ApplicationAssistant(String nativeLibPath)
             throws OfficeApplicationException {
-        if (OSHelper.IS_WINDOWS) {
-            try {
-                String libPathFromProps = System
-                        .getProperty(IOfficeApplication.NOA_NATIVE_LIB_PATH);
-                if (libPathFromProps != null) {
-                    nativeLibPath = libPathFromProps;
-                }
-                if (nativeLibPath != null) {
-                    String libName = "ICE_JNIRegistry.dll";
-                    String folder64bit = "64bit";
-                    boolean is64Bit = Integer.valueOf(System.getProperties()
-                            .getProperty("sun.arch.data.model")) == 64;
-                    if (is64Bit) {
-                        if (new File(nativeLibPath + "/" + folder64bit + "/"
-                                + libName).exists()) {
-                            nativeLibPath = nativeLibPath + "/" + folder64bit;
-                        }
-                    }
-                    System.load(nativeLibPath + "\\" + libName); //$NON-NLS-1$
-                } else {
-                    System.loadLibrary("ICE_JNIRegistry"); //$NON-NLS-1$
-                }
-            } catch (Throwable throwable) {
-                throw new OfficeApplicationException(throwable);
-            }
-        }
     }
 
     // ----------------------------------------------------------------------------
@@ -122,7 +97,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * application, or null if none was found.
      *
      * @return informations about latest available local OpenOffice.org
-     * application, or null if none was found
+     *         application, or null if none was found
      *
      * @author Markus Krüger
      * @date 04.03.2012
@@ -137,10 +112,10 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * application, or null if none was found.
      *
      * @param officeProgressMonitor office progress monitor to be used, can be
-     * null
+     *                              null
      *
      * @return informations about latest available local OpenOffice.org
-     * application, or null if none was found
+     *         application, or null if none was found
      *
      * @author Markus Krüger
      * @date 04.03.2012
@@ -156,15 +131,18 @@ public class ApplicationAssistant implements IApplicationAssistant {
                 if (appInfo instanceof LazyOpenOfficeOrgApplicationInfo || appInfo instanceof LazyOpenOfficeApplicationInfo) {//for now, they are mostly compatible
                     if (latestLazyApplicationInfo == null) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() > latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() > latestLazyApplicationInfo
                             .getMajorVersion()) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
                             .getMajorVersion()
                             && appInfo.getMinorVersion() > latestLazyApplicationInfo
                             .getMinorVersion()) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
                             .getMajorVersion()
                             && appInfo.getMinorVersion() == latestLazyApplicationInfo
                             .getMinorVersion()
@@ -184,7 +162,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * application, or null if none was found.
      *
      * @return informations about latest available local LibreOffice
-     * application, or null if none was found
+     *         application, or null if none was found
      *
      * @author Markus Krüger
      * @date 04.03.2012
@@ -199,10 +177,10 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * application, or null if none was found.
      *
      * @param officeProgressMonitor office progress monitor to be used, can be
-     * null
+     *                              null
      *
      * @return informations about latest available local LibreOffice
-     * application, or null if none was found
+     *         application, or null if none was found
      *
      * @author Markus Krüger
      * @date 04.03.2012
@@ -218,15 +196,18 @@ public class ApplicationAssistant implements IApplicationAssistant {
                 if (appInfo instanceof LazyLibreOfficeApplicationInfo) {
                     if (latestLazyApplicationInfo == null) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() > latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() > latestLazyApplicationInfo
                             .getMajorVersion()) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
                             .getMajorVersion()
                             && appInfo.getMinorVersion() > latestLazyApplicationInfo
                             .getMinorVersion()) {
                         latestLazyApplicationInfo = appInfo;
-                    } else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
+                    }
+                    else if (appInfo.getMajorVersion() == latestLazyApplicationInfo
                             .getMajorVersion()
                             && appInfo.getMinorVersion() == latestLazyApplicationInfo
                             .getMinorVersion()
@@ -246,7 +227,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * null if none was found.
      *
      * @return informations about latest available local office application, or
-     * null if none was found
+     *         null if none was found
      *
      * @deprecated As now also LibreOffice is supported, this method is only
      * keept for compatibility reasons and returns the same as
@@ -265,13 +246,13 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * null if none was found.
      *
      * @param officeProgressMonitor office progress monitor to be used, can be
-     * null
+     *                              null
      *
      * @return informations about latest available local office application, or
-     * null if none was found
+     *         null if none was found
      *
      * @deprecated As now also LibreOffice is supported, this method is only
-     * keept for compatibility reasons and returns the same as null null null null     {@link #getLatestLocalOpenOfficeOrgApplication(IOfficeProgressMonitor)
+     * keept for compatibility reasons and returns the same as null null null null null null null null     {@link #getLatestLocalOpenOfficeOrgApplication(IOfficeProgressMonitor)
 	 *             )}
      *
      * @author Markus Krüger
@@ -315,11 +296,12 @@ public class ApplicationAssistant implements IApplicationAssistant {
             if (applicationInfo != null) {
                 arrayList.add(applicationInfo);
             }
-        } else if (OSHelper.IS_WINDOWS) {
+        }
+        else if (OSHelper.IS_WINDOWS) {
             try {
+                String[] possibleLibreOfficeKeys = getPossibleKeys(KEY_MAIN_PART_LIBRE_OFFICE);
                 String[] possibleOpenOfficeOrgKeys = getPossibleKeys(KEY_MAIN_PART_OPEN_OFFICE_ORG);
                 String[] possibleOpenOfficeKeys = getPossibleKeys(KEY_MAIN_PART_OPEN_OFFICE);
-                String[] possibleLibreOfficeKeys = getPossibleKeys(KEY_MAIN_PART_LIBRE_OFFICE);
                 List keys = new ArrayList();
                 keys.addAll(Arrays.asList(possibleOpenOfficeOrgKeys));
                 keys.addAll(Arrays.asList(possibleOpenOfficeKeys));
@@ -329,63 +311,52 @@ public class ApplicationAssistant implements IApplicationAssistant {
                 if (officeProgressMonitor != null) {
                     officeProgressMonitor
                             .beginTask(
-                            Messages.getString("ApplicationAssistant.monitor_message_scannig_registry"), possibleKeys.length); //$NON-NLS-1$
+                                    Messages.getString("ApplicationAssistant.monitor_message_scannig_registry"), possibleKeys.length); //$NON-NLS-1$
                 }
-                RegistryKey[] ROOTS = new RegistryKey[]{
-                    Registry.HKEY_CLASSES_ROOT, Registry.HKEY_CURRENT_USER,
-                    Registry.HKEY_LOCAL_MACHINE};
+                String[] ROOTS = new String[]{
+                    "HKEY_CLASSES_ROOT", "HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE"};
                 for (int i = 0, n = possibleKeys.length; i < n; i++) {
                     if (officeProgressMonitor != null) {
                         officeProgressMonitor
                                 .beginSubTask(Messages
-                                .getString(
-                                "ApplicationAssistant.monitor_scanning_key", possibleKeys[i])); //$NON-NLS-1$
+                                        .getString(
+                                                "ApplicationAssistant.monitor_scanning_key", possibleKeys[i])); //$NON-NLS-1$
                     }
                     for (int j = 0; j < ROOTS.length; j++) {
-                        RegistryKey registryKey = Registry.openSubkey(ROOTS[j],
-                                possibleKeys[i], RegistryKey.ACCESS_READ);
-                        //System.out.println(possibleKeys[i]);
-                        if (registryKey != null) {
 
-                            String path = null;
-                            if (path == null) {
-                                try {
-                                    path = registryKey.getStringValue("Path");
-                                    path = "\"" + path + "\"";
-                                } catch (NoSuchValueException noSuchValueException) {
-                                    // ignore
-                                }
-                            }
-                            if (path == null) {
-                                try {
-                                    path = registryKey.getDefaultValue();
-                                } catch (NoSuchValueException noSuchValueException) {
-                                    // ignore
-                                }
-                            }
-                            if (path != null) {
-                                int position = path
-                                        .indexOf(APPLICATION_EXECUTEABLE);
-                                if (position != -1) {
-                                    path = path.substring(1, position - 9);
-                                    ILazyApplicationInfo applicationInfo = findLocalApplicationInfo(path);
-                                    if (applicationInfo != null) {
-                                        boolean found = false;
-                                        for (Iterator iterator = arrayList
-                                                .iterator(); iterator.hasNext();) {
-                                            ILazyApplicationInfo tmpApplicationInfo = (ILazyApplicationInfo) iterator
-                                                    .next();
-                                            if (tmpApplicationInfo.getHome()
-                                                    .equalsIgnoreCase(
-                                                    applicationInfo
-                                                    .getHome())) {
-                                                found = true;
-                                                break;
-                                            }
+                        String registryKey = ROOTS[j] + "\\" + possibleKeys[i];
+                        System.out.println(registryKey);
+
+                        String path = null;
+                        if (path == null) {
+                            path = WinRegistryHelper.readRegistry(registryKey, "path");
+                            if (path != null)
+                                path = "\"" + path + "\"";
+                        }
+                        if (path == null) {
+                            path = WinRegistryHelper.readRegistry(registryKey, null);
+                        }
+                        if (path != null) {
+                            int position = path.indexOf(APPLICATION_EXECUTEABLE);
+                            if (position != -1) {
+                                path = path.substring(1, position - 9);
+                                ILazyApplicationInfo applicationInfo = findLocalApplicationInfo(path);
+                                if (applicationInfo != null) {
+                                    boolean found = false;
+                                    for (Iterator iterator = arrayList
+                                            .iterator(); iterator.hasNext();) {
+                                        ILazyApplicationInfo tmpApplicationInfo = (ILazyApplicationInfo) iterator
+                                                .next();
+                                        if (tmpApplicationInfo.getHome()
+                                                .equalsIgnoreCase(
+                                                        applicationInfo
+                                                                .getHome())) {
+                                            found = true;
+                                            break;
                                         }
-                                        if (!found) {
-                                            arrayList.add(applicationInfo);
-                                        }
+                                    }
+                                    if (!found) {
+                                        arrayList.add(applicationInfo);
                                     }
                                 }
                             }
@@ -400,12 +371,13 @@ public class ApplicationAssistant implements IApplicationAssistant {
             } catch (Throwable throwable) {
                 return ILazyApplicationInfo.EMPTY_LAZY_APPLICATION_INFOS_ARRAY;
             }
-        } else {
+        }
+        else {
             try {
                 if (officeProgressMonitor != null) {
                     officeProgressMonitor
                             .beginTask(
-                            Messages.getString("ApplicationAssistant.monitor_looking_for_office_application"), IOfficeProgressMonitor.WORK_UNKNOWN); //$NON-NLS-1$
+                                    Messages.getString("ApplicationAssistant.monitor_looking_for_office_application"), IOfficeProgressMonitor.WORK_UNKNOWN); //$NON-NLS-1$
                 }
                 ArrayList possibleOfficeHomes = new ArrayList();
 
@@ -427,7 +399,8 @@ public class ApplicationAssistant implements IApplicationAssistant {
                     }
                     findPossibleOfficeHomes(officeProgressMonitor,
                             folderToSearch, possibleOfficeHomes, 1, -1);
-                } else { // linux, unix
+                }
+                else { // linux, unix
                     File file = new File("/opt"); //$NON-NLS-1$
                     findPossibleOfficeHomes(officeProgressMonitor, file,
                             possibleOfficeHomes, 1, 2);
@@ -439,7 +412,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
                 if (officeProgressMonitor != null) {
                     officeProgressMonitor
                             .beginSubTask(Messages
-                            .getString("ApplicationAssistant.monitor_buildung_application_infos")); //$NON-NLS-1$
+                                    .getString("ApplicationAssistant.monitor_buildung_application_infos")); //$NON-NLS-1$
                 }
                 String[] officeHomes = (String[]) possibleOfficeHomes
                         .toArray(new String[possibleOfficeHomes.size()]);
@@ -474,7 +447,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * @param home home path to be used
      *
      * @return application info on the basis of the submitted application home
-     * path or null if the application info can not be provided
+     *         path or null if the application info can not be provided
      *
      * @author Andreas Bröker
      */
@@ -489,11 +462,13 @@ public class ApplicationAssistant implements IApplicationAssistant {
             file = new File(home + File.separator + PROGRAM_FOLDER
                     + File.separator + APPLICATION_EXECUTEABLE + ".exe"); //$NON-NLS-1$
 
-        } else if (OSHelper.IS_MAC) {
+        }
+        else if (OSHelper.IS_MAC) {
             file = new File(home + File.separator + PRE_PROGRAM_FOLDER_MAC
                     + File.separator + PROGRAM_FOLDER + File.separator
                     + APPLICATION_EXECUTEABLE + ".bin"); //$NON-NLS-1$
-        } else {
+        }
+        else {
             file = new File(home + File.separator + PROGRAM_FOLDER
                     + File.separator + APPLICATION_EXECUTEABLE + ".bin"); //$NON-NLS-1$
         }
@@ -533,9 +508,9 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * Looks for possible office home path entries.
      *
      * @param officeProgressMonitor office progress monitor to be used (can be
-     * null)
-     * @param root root file entry to be used
-     * @param list list to be filled with possible office home entries
+     *                              null)
+     * @param root                  root file entry to be used
+     * @param list                  list to be filled with possible office home entries
      *
      * @author Andreas Bröker
      * @author Markus Krüger
@@ -551,8 +526,8 @@ public class ApplicationAssistant implements IApplicationAssistant {
             if (officeProgressMonitor != null) {
                 officeProgressMonitor
                         .beginSubTask(Messages
-                        .getString(
-                        "ApplicationAssistant.monitor_scanning_directory", root.getName())); //$NON-NLS-1$
+                                .getString(
+                                        "ApplicationAssistant.monitor_scanning_directory", root.getName())); //$NON-NLS-1$
             }
         }
         File[] files = root.listFiles();
@@ -572,7 +547,8 @@ public class ApplicationAssistant implements IApplicationAssistant {
                         {
                             homePathIdentified = true;
                         }
-                    } else {
+                    }
+                    else {
                         if (fileName.equals(APPLICATION_EXECUTEABLE + ".exe")) //$NON-NLS-1$
                         {
                             homePathIdentified = true;
@@ -599,7 +575,8 @@ public class ApplicationAssistant implements IApplicationAssistant {
                         if (progDirExists) {
                             findPossibleOfficeHomes(officeProgressMonitor,
                                     progDir, list, 1, 1);
-                        } else if (currentLevel < maxLevel || maxLevel == -1) {
+                        }
+                        else if (currentLevel < maxLevel || maxLevel == -1) {
                             findPossibleOfficeHomes(officeProgressMonitor,
                                     file, list, currentLevel + 1, maxLevel);
                         }
@@ -617,7 +594,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * @param home home of the office application
      *
      * @return application properties on the basis of the submitted office home
-     * path or null if the application properties can not be found
+     *         path or null if the application properties can not be found
      *
      * @author Andreas Bröker
      */
@@ -626,10 +603,12 @@ public class ApplicationAssistant implements IApplicationAssistant {
         Properties properties = new Properties();
         if (OSHelper.IS_WINDOWS) {
             file = new File(home + File.separator + RELATIVE_BOOTSTRAP + ".ini"); //$NON-NLS-1$
-        } else if (OSHelper.IS_MAC) {
+        }
+        else if (OSHelper.IS_MAC) {
             file = new File(home + File.separator + PRE_PROGRAM_FOLDER_MAC
                     + File.separator + RELATIVE_BOOTSTRAP + "rc"); //$NON-NLS-1$
-        } else {
+        }
+        else {
             // linux,unix
             file = new File(home + File.separator + RELATIVE_BOOTSTRAP + "rc"); //$NON-NLS-1$
         }
@@ -689,6 +668,23 @@ public class ApplicationAssistant implements IApplicationAssistant {
      * @author Markus Krüger
      */
     private String[] getPossibleKeys(String keyMainPart) {
+        ArrayList arrayList = new ArrayList();
+//        arrayList.add("SOFTWARE\\" + keyMainPart + "\\" + keyMainPart );
+        arrayList.add("SOFTWARE\\Classes\\"+keyMainPart+".WriterDocument.1\\shell\\open\\command");
+        return (String[]) arrayList.toArray(new String[arrayList.size()]);
+    }
+
+    /**
+     * Returns possible windows registry keys with the given key main part.
+     *
+     * @param keyMainPart The key main part to use as keys.
+     *
+     * @return possible windows registry keys with the given key main part.
+     *
+     * @author Andreas Bröker
+     * @author Markus Krüger
+     */
+    private String[] getAltKeys(String keyMainPart) {
 
         ArrayList arrayList = new ArrayList();
         int majorVersion;

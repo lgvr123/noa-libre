@@ -47,10 +47,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +56,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import junit.framework.TestCase;
 
@@ -73,6 +68,9 @@ import junit.framework.TestCase;
 public class OfficeBeanTest extends TestCase {
 
     private static Logger LOGGER = Logger.getLogger("ag.ion");
+
+    private static final File ROOT = new File(ApplicationAssistant.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+
 
     private IDocument document = null;
     private File file = null;
@@ -94,8 +92,12 @@ public class OfficeBeanTest extends TestCase {
         LOGGER.addHandler(consoleHandler);
         LOGGER.setLevel(Level.FINEST);
 
+        System.out.println("--We are running in--");
+        System.out.println(ROOT);
+
+        
         try {
-            FileHandler fileHandler = new FileHandler("log.xml");
+            FileHandler fileHandler = new FileHandler(ROOT+File.separator+"log.xml");
             fileHandler.setLevel(Level.FINEST);
             LOGGER.addHandler(fileHandler);
         } catch (Throwable throwable) {
@@ -178,28 +180,7 @@ public class OfficeBeanTest extends TestCase {
     public void test(String officeHome) throws OfficeApplicationException {
         System.out.println("NOA Office Bean Test");
 
-        // print class path where dll & co will be searzched
-        System.out.println("--We are running in--");
-        final File root = new File(ApplicationAssistant.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        System.out.println(root);
         
-        System.out.println("--Library Path--");
-        String paths = System.getProperty("java.library.path");
-//        paths=paths+File.pathSeparator+root.getPath();
-//        System.setProperty("java.library.path",paths);
-//        paths = System.getProperty("java.library.path");
-        Stream.of(paths.split(File.pathSeparator)).forEach(p->System.out.println(p));
-
-        System.out.println("--Class Path--");
-        paths = System.getProperty("java.class.path");
-        Stream.of(paths.split(File.pathSeparator)).forEach(p->System.out.println(p));
-        
-//        final String icedll = root + File.separator + "ICE_JNIRegistry.dll";
-        final String icedll = root + File.separator + "64bit" + File.separator + "ICE_JNIRegistry.dll";
-        System.out.println(icedll);
-        System.load(icedll);
-        
-
         if (officeHome == null) {
             IApplicationAssistant applicationAssistant = new ApplicationAssistant();
             ILazyApplicationInfo appInfo = applicationAssistant.getLatestLocalOpenOfficeOrgApplication();
@@ -246,7 +227,7 @@ public class OfficeBeanTest extends TestCase {
             IFrame officeFrame = application.getDesktopService().constructNewOfficeFrame(panel);
             document = application.getDocumentService().constructNewHiddenDocument(IDocument.WRITER);
             System.out.println("Document for test constructed.");
-            file = new File("OfficeBeanTest.odt");
+            file = new File(ROOT+File.separator+"OfficeBeanTest.odt");
             document.getPersistenceService().store(new FileOutputStream(file));
             document.close();
             System.out.println("Loading document for test ...");
@@ -255,7 +236,7 @@ public class OfficeBeanTest extends TestCase {
 
             System.out.println("Document export to pdf..");
             PDFFilter pdfFilter = PDFFilter.FILTER;
-            File pdf = new File("OfficeBeanTestPdfa.pdf");
+            File pdf = new File(ROOT+File.separator+"OfficeBeanTestPdfa.pdf");
             pdf.delete();
 //FIXME commented out is special for pdf/A, will become part of noalibre 
 //         PropertyValue[] filterData = new PropertyValue[1];

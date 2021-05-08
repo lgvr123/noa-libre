@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * ubion.ORS - The Open Report Suite                                        *
  *                                                                          *
  * ------------------------------------------------------------------------ *
@@ -8,7 +8,7 @@
  *                                                                          *
  * The Contents of this file are made available subject to                  *
  * the terms of GNU Lesser General Public License Version 2.1.              *
- *                                                                          * 
+ *                                                                          *
  * GNU Lesser General Public License Version 2.1                            *
  * ======================================================================== *
  * Copyright 2003-2005 by IOn AG                                            *
@@ -31,91 +31,127 @@
  *  http://www.ion.ag                                                       *
  *  info@ion.ag                                                             *
  *                                                                          *
- ****************************************************************************/
- 
+ *************************************************************************** */
 /*
  * Last changes made by $Author: andreas $, $Date: 2006-10-04 14:14:28 +0200 (Mi, 04 Okt 2006) $
  */
 package ag.ion.bion.officelayer.internal.document;
 
+import ag.ion.bion.officelayer.internal.application.connection.LocalOfficeConnection;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 /**
  * Messages provider.
- * 
+ *
  * @author Andreas Bröker
  * @version $Revision: 10398 $
  */
 public class Messages {
-  
-  private static final String BUNDLE_NAME = "ag.ion.bion.officelayer.internal.document.messages"; //$NON-NLS-1$
 
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static final String BUNDLE_NAME = "ag.ion.bion.officelayer.internal.document.messages"; //$NON-NLS-1$
+    private static Logger LOGGER = Logger.getLogger(Messages.class.getName());
 
-  //---------------------------------------------------------------------------- 
-  /**
-   * Returns message.
-   * 
-   * @param key key to be used
-   * 
-   * @return recognized message
-   * 
-   * @author Andreas Bröker
-   */
-  public static String getString(String key) {
-    try {
-      return RESOURCE_BUNDLE.getString(key);
+    private static ResourceBundle RESOURCE_BUNDLE = null;
+
+    protected static void initMessages() {
+        try {
+            RESOURCE_BUNDLE = null;
+            RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+        } catch (java.util.MissingResourceException e) {
+            // could be MissingResourceException
+            LOGGER.warning(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.throwing(Messages.class.getName(), "init", e);
+        }
+
+        if (RESOURCE_BUNDLE == null)
+            RESOURCE_BUNDLE = new ResourceBundle() {
+                Vector<String> v = new Vector<>();
+
+                @Override
+                protected Object handleGetObject(String key) {
+                    return null;
+                }
+
+                @Override
+                public Enumeration<String> getKeys() {
+                    return v.elements();
+                }
+            };
     }
-    catch (MissingResourceException missingResourceException) {
-      return '!' + key + '!';
+
+    //---------------------------------------------------------------------------- 
+    /**
+     * Returns message.
+     *
+     * @param key key to be used
+     *
+     * @return recognized message
+     *
+     * @author Andreas Bröker
+     */
+    public static String getString(String key) {
+        if (RESOURCE_BUNDLE == null)
+            initMessages();
+
+        try {
+            return RESOURCE_BUNDLE.getString(key);
+        } catch (MissingResourceException missingResourceException) {
+            return '!' + key + '!';
+        }
     }
-  }
-  //---------------------------------------------------------------------------- 
-  /**
-   * Returns message.
-   * 
-   * @param key key to be used
-   * @param argument message argument to be used
-   * 
-   * @return recognized message
-   * 
-   * @author Andreas Bröker
-   */
-  public static String getString(String key, Object argument) {
-    return getString(key, new Object[]{argument});
-  }
-  //---------------------------------------------------------------------------- 
-  /**
-   * Returns message.
-   * 
-   * @param key key to be used
-   * @param arguments message arguments to be used
-   * 
-   * @return recognized message
-   * 
-   * @author Andreas Bröker
-   */
-  public static String getString(String key, Object[] arguments) {
-    try {
-      String message = RESOURCE_BUNDLE.getString(key);
-      message = MessageFormat.format(message, arguments);
-      return message;
+    //---------------------------------------------------------------------------- 
+
+    /**
+     * Returns message.
+     *
+     * @param key      key to be used
+     * @param argument message argument to be used
+     *
+     * @return recognized message
+     *
+     * @author Andreas Bröker
+     */
+    public static String getString(String key, Object argument) {
+        return getString(key, new Object[]{argument});
     }
-    catch (MissingResourceException missingResourceException) {
-      return '!' + key + '!';
+    //---------------------------------------------------------------------------- 
+
+    /**
+     * Returns message.
+     *
+     * @param key       key to be used
+     * @param arguments message arguments to be used
+     *
+     * @return recognized message
+     *
+     * @author Andreas Bröker
+     */
+    public static String getString(String key, Object[] arguments) {
+        try {
+            String message = RESOURCE_BUNDLE.getString(key);
+            message = MessageFormat.format(message, arguments);
+            return message;
+        } catch (MissingResourceException missingResourceException) {
+            return '!' + key + '!';
+        }
     }
-  }
-  //---------------------------------------------------------------------------- 
-  /**
-   * Prevents instantiation.
-   *
-   * @author Andreas Bröker
-   */
-  private Messages() {
-  }
-  //---------------------------------------------------------------------------- 
+    //---------------------------------------------------------------------------- 
+
+    /**
+     * Prevents instantiation.
+     *
+     * @author Andreas Bröker
+     */
+    private Messages() {
+    }
+    //---------------------------------------------------------------------------- 
 
 }
