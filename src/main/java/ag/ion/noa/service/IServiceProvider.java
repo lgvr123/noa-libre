@@ -36,6 +36,7 @@
  */
 package ag.ion.noa.service;
 
+import ag.ion.bion.officelayer.application.connection.IOfficeConnection;
 import ag.ion.noa.NOAException;
 
 /**
@@ -81,4 +82,9 @@ public interface IServiceProvider {
   public Object createServiceWithContext(String serviceName) throws NOAException;
   //----------------------------------------------------------------------------
   
+  /**
+   * Returns the office connection used by this provider
+   * @return 
+   */
+  public default IOfficeConnection getOfficeConnection() { return null; }
 }

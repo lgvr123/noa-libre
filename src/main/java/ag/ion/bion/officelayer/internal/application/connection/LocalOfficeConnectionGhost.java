@@ -38,6 +38,7 @@
  */
 package ag.ion.bion.officelayer.internal.application.connection;
 
+import ag.ion.bion.officelayer.NativeView;
 import java.awt.Container;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -64,6 +65,8 @@ import com.sun.star.lang.XEventListener;
 import com.sun.star.lib.uno.helper.UnoUrl;
 import com.sun.star.lib.util.NativeLibraryLoader;
 import com.sun.star.uno.XComponentContext;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Office connection implementation. This class bases on the implementation of
@@ -103,6 +106,8 @@ public class LocalOfficeConnectionGhost implements OfficeConnection {
 
     private OfficeConnectionWrapper officeConnectionWrapper = null;
     private IOfficeProgressMonitor officeProgressMonitor = null;
+
+    private static Logger LOGGER = Logger.getLogger(LocalOfficeConnectionGhost.class.getName());
 
     // ----------------------------------------------------------------------------
     /**
@@ -644,23 +649,20 @@ public class LocalOfficeConnectionGhost implements OfficeConnection {
                 // https://forum.openoffice.org/en/forum/viewtopic.php?f=44&t=2520&sid=b0fdbdfa503415a8b7ec8031913009ea
 //				xContext = Bootstrap.bootstrap();
                 String path = getProgramPath();
-                System.out.println("Boostrapping with : " + path);
+                LOGGER.fine("Boostrapping with : " + path);
                 try {
                     xContext = BootstrapSocketConnector.bootstrap(path);
                     return xContext;
                 } catch (BootstrapException ex) {
-                    System.err.println(ex.getLocalizedMessage());
+                    LOGGER.log(Level.FINE, "Boostrapping with Program Path", ex.getMessage());
                 }
                 path = System.getProperty("office.home"); //$NON-NLS-1$
-                System.out.println("Boostrapping with : " + path);
-                    xContext = BootstrapSocketConnector.bootstrap(path);
-             }
+                LOGGER.fine("Boostrapping with : " + path);
+                xContext = BootstrapSocketConnector.bootstrap(path);
+            }
             return xContext;
         } catch (java.lang.Exception exception) {
-            System.out.println("java.lang.Exception: "); //$NON-NLS-1$
-            System.out.println(exception);
-            exception.printStackTrace();
-            System.out.println("--- end."); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, "Boostrapping Office", exception);
             throw new com.sun.star.uno.RuntimeException(exception.toString());
         }
     }

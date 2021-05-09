@@ -53,6 +53,7 @@ import java.util.Map;
 public class OfficeApplicationRuntime {
 
     private static IApplicationAssistant applicationAssistant = null;
+    private static IOfficeApplication officeApplication = null;
 
     //----------------------------------------------------------------------------
     /**
@@ -119,6 +120,9 @@ public class OfficeApplicationRuntime {
      * @author Andreas Weber
      */
     public static IOfficeApplication getApplication() throws OfficeApplicationException {
+        
+        if (officeApplication!=null) return officeApplication;
+        
         ILazyApplicationInfo appInfo = getApplicationAssistant().getLatestLocalLibreOfficeApplication();
         if (appInfo == null) {
             appInfo = getApplicationAssistant().getLatestLocalOpenOfficeOrgApplication();
@@ -127,8 +131,10 @@ public class OfficeApplicationRuntime {
         Map configuration = new HashMap();
         configuration.put(IOfficeApplication.APPLICATION_HOME_KEY, appInfo.getHome());
         configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
+        
+        officeApplication = new LocalOfficeApplication(configuration);
 
-        return new LocalOfficeApplication(configuration);
+        return officeApplication;
     }
 
     //----------------------------------------------------------------------------

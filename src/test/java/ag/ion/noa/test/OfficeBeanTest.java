@@ -26,6 +26,7 @@
 package ag.ion.noa.test;
 
 import ag.ion.bion.officelayer.application.IApplicationAssistant;
+import ag.ion.bion.officelayer.application.IApplicationInfo;
 import ag.ion.bion.officelayer.application.ILazyApplicationInfo;
 import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
@@ -37,6 +38,7 @@ import ag.ion.bion.officelayer.document.DocumentDescriptor;
 import ag.ion.bion.officelayer.document.IDocument;
 import ag.ion.bion.officelayer.filter.PDFFilter;
 import ag.ion.bion.officelayer.internal.application.ApplicationAssistant;
+import com.zparkingb.utils.ZApplicationFolder;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
@@ -69,8 +71,7 @@ public class OfficeBeanTest extends TestCase {
 
     private static Logger LOGGER = Logger.getLogger("ag.ion");
 
-    private static final File ROOT = new File(ApplicationAssistant.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-
+    private static final File ROOT = ZApplicationFolder.getApplicationPath(ApplicationAssistant.class).toFile();
 
     private IDocument document = null;
     private File file = null;
@@ -95,9 +96,8 @@ public class OfficeBeanTest extends TestCase {
         System.out.println("--We are running in--");
         System.out.println(ROOT);
 
-        
         try {
-            FileHandler fileHandler = new FileHandler(ROOT+File.separator+"log.xml");
+            FileHandler fileHandler = new FileHandler(ROOT + File.separator + "log.xml");
             fileHandler.setLevel(Level.FINEST);
             LOGGER.addHandler(fileHandler);
         } catch (Throwable throwable) {
@@ -180,29 +180,22 @@ public class OfficeBeanTest extends TestCase {
     public void test(String officeHome) throws OfficeApplicationException {
         System.out.println("NOA Office Bean Test");
 
-        
-        if (officeHome == null) {
-            IApplicationAssistant applicationAssistant = new ApplicationAssistant();
-            ILazyApplicationInfo appInfo = applicationAssistant.getLatestLocalOpenOfficeOrgApplication();
-            if (appInfo == null) {
-                appInfo = applicationAssistant.getLatestLocalLibreOfficeApplication();
-            }
-            if (appInfo == null) {
-                throw new IllegalStateException("No OO/LO found.");
-            }
-            System.out.println(appInfo.getClass() + " - Office major version:" + appInfo.getMajorVersion());
-
-            officeHome = appInfo.getHome();
-        }
-        System.out.println("Office home: " + officeHome);
-        HashMap hashMap = new HashMap(2);
-        hashMap.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
-        hashMap.put(IOfficeApplication.APPLICATION_HOME_KEY, officeHome);
-
         try {
             System.out.println("Activating OpenOffice.org connection ...");
-            final IOfficeApplication application = OfficeApplicationRuntime.getApplication(hashMap);
+            IOfficeApplication application;
+            if (officeHome != null) {
+                HashMap hashMap = new HashMap(2);
+                hashMap.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
+                hashMap.put(IOfficeApplication.APPLICATION_HOME_KEY, officeHome);
+                application = OfficeApplicationRuntime.getApplication(hashMap);
+            }
+            else {
+                application = OfficeApplicationRuntime.getApplication();
+            }
             application.activate();
+            IApplicationInfo info = application.getApplicationInfo();
+            String which=info.getOfficeHome();
+            System.out.println("Using "+which);
             final Frame frame = new Frame();
             frame.setVisible(true);
             frame.setSize(400, 400);
@@ -227,7 +220,7 @@ public class OfficeBeanTest extends TestCase {
             IFrame officeFrame = application.getDesktopService().constructNewOfficeFrame(panel);
             document = application.getDocumentService().constructNewHiddenDocument(IDocument.WRITER);
             System.out.println("Document for test constructed.");
-            file = new File(ROOT+File.separator+"OfficeBeanTest.odt");
+            file = new File(ROOT + File.separator + "OfficeBeanTest.odt");
             document.getPersistenceService().store(new FileOutputStream(file));
             document.close();
             System.out.println("Loading document for test ...");
@@ -236,7 +229,7 @@ public class OfficeBeanTest extends TestCase {
 
             System.out.println("Document export to pdf..");
             PDFFilter pdfFilter = PDFFilter.FILTER;
-            File pdf = new File(ROOT+File.separator+"OfficeBeanTestPdfa.pdf");
+            File pdf = new File(ROOT + File.separator + "OfficeBeanTestPdfa.pdf");
             pdf.delete();
 //FIXME commented out is special for pdf/A, will become part of noalibre 
 //         PropertyValue[] filterData = new PropertyValue[1];

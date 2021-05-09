@@ -45,6 +45,12 @@ import java.awt.Graphics;
 import java.io.File;
 
 import ag.ion.bion.officelayer.application.IOfficeApplication;
+import ag.ion.bion.officelayer.internal.application.connection.LocalOfficeConnection;
+import com.zparkingb.utils.ZApplicationFolder;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 
 /**
  * Class to pass the system window handle to the OpenOffice.org toolkit.
@@ -99,7 +105,7 @@ public class NativeView extends Canvas {
 
     private String libPath = null;
 
-    private static final File DEFAULT_LIB_PATH = new File(NativeView.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+    private static Logger LOGGER = Logger.getLogger(NativeView.class.getName());
 
     //----------------------------------------------------------------------------
     /**
@@ -217,10 +223,20 @@ public class NativeView extends Canvas {
             libPath = libPathFromProps;
         }
         if (libPath == null) {
-            libPath= DEFAULT_LIB_PATH.getPath() + File.separator + "lib";
+            Path path = ZApplicationFolder.getApplicationPath(NativeView.class, "lib");
+            if (Files.notExists(path)) {
+                try {
+                    // We have to use the self-contained librairies, but the folder is ot physically available. Extract it from the jar.
+                    LOGGER.finer("Extracting libs to " + libPath);
+                    ZApplicationFolder.extractFolderFromRessource(NativeView.class, Path.of("lib"), path);
+                    libPath = path.toString();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
         if (libPath != null) {
-            System.out.println("--Looking for libs in : " + libPath);
+            LOGGER.finer("Looking for libs in " + libPath);
             String libName = "libnativeview.so";
             String folder64bit = "64bit";
             if (OSHelper.IS_WINDOWS) {

@@ -402,8 +402,6 @@ public class LocalOfficeConnection extends AbstractOfficeConnection {
                     LOGGER.finest("Creating local office window.");
 
                 // Get where we are running
-                final File root = new File(LocalOfficeConnection.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-                //final NativeView nativeView = new NativeView(System.getProperty("user.dir")+"/lib");
                 final NativeView nativeView = new NativeView();
                 container.add(nativeView);
                 return getOfficeFrame(nativeView);
@@ -564,4 +562,22 @@ public class LocalOfficeConnection extends AbstractOfficeConnection {
     }
     //----------------------------------------------------------------------------
 
+    /**
+     * Returns the Office path
+     * @return 
+     */
+    public String getOfficePath() {
+        return officePath;
+    }
+
+    /**
+     * Returns the arguments with whom the application was started
+     * @return 
+     */
+    public String[] getOfficeArguments() {
+        return officeArguments;
+    }
+
+    
+    
 }

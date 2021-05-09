@@ -227,4 +227,6 @@ public interface IApplicationInfo {
   public void dumpInfo(String path) throws Exception;
   //----------------------------------------------------------------------------
 
+  public String getOfficeHome();
+  
 }

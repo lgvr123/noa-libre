@@ -115,5 +115,16 @@ public class ServiceProvider implements IServiceProvider {
     }
   }
   //----------------------------------------------------------------------------
+
+  /**
+   * Returns the OfficeConnection used by this Service Provider
+   * @return 
+   */
+    @Override
+    public IOfficeConnection getOfficeConnection() {
+        return officeConnection;
+    }
+  
+  
   
 }
