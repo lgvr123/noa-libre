@@ -61,6 +61,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
     private static final String RELATIVE_BOOTSTRAP = PROGRAM_FOLDER
             + File.separator + "bootstrap"; //$NON-NLS-1$ //$NON-NLS-2$
     private static final String APPLICATION_EXECUTEABLE = "soffice"; //$NON-NLS-1$
+    private static final String WRITER_EXECUTEABLE = "swriter";
     private static final String VERSIONRC = PROGRAM_FOLDER + File.separator + "versionrc";
 
     // ----------------------------------------------------------------------------
@@ -337,7 +338,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
                             path = WinRegistryHelper.readRegistry(registryKey, null);
                         }
                         if (path != null) {
-                            int position = path.indexOf(APPLICATION_EXECUTEABLE);
+                            int position = path.indexOf(WRITER_EXECUTEABLE);
                             if (position != -1) {
                                 path = path.substring(1, position - 9);
                                 ILazyApplicationInfo applicationInfo = findLocalApplicationInfo(path);

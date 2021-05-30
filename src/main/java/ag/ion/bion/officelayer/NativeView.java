@@ -50,6 +50,7 @@ import com.zparkingb.utils.ZApplicationFolder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -154,7 +155,9 @@ public class NativeView extends Canvas {
      * and safe the handle and the system type on our members maHandle/maSystem!
      */
     public void setVisible(boolean bState) {
-        getHWND();
+        super.setVisible(bState);
+        if (this.isShowing())
+            getHWND();
     }
 
     //----------------------------------------------------------------------------
@@ -224,15 +227,19 @@ public class NativeView extends Canvas {
         }
         if (libPath == null) {
             Path path = ZApplicationFolder.getApplicationPath(NativeView.class, "lib");
-            if (Files.notExists(path)) {
+            LOGGER.log(Level.FINE, "Searching for libs in {0}", path.toString());
+            if (Files.notExists(path.resolve("nativeview.dll")) || Files.notExists(path.resolve("libnativeview.so"))) {
                 try {
                     // We have to use the self-contained librairies, but the folder is ot physically available. Extract it from the jar.
-                    LOGGER.finer("Extracting libs to " + libPath);
+                    LOGGER.log(Level.INFO, "Extracting OpenOffice librairies to {0}", path.toString());
                     ZApplicationFolder.extractFolderFromRessource(NativeView.class, Path.of("lib"), path);
                     libPath = path.toString();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "Failed to extract OpenOffice librairies", ex);
                 }
+            }
+            else {
+                libPath = path.toString();
             }
         }
         if (libPath != null) {

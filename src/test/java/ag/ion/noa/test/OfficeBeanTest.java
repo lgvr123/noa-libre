@@ -36,6 +36,7 @@ import ag.ion.bion.officelayer.desktop.IFrame;
 
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
 import ag.ion.bion.officelayer.document.IDocument;
+import ag.ion.bion.officelayer.filter.IFilter;
 import ag.ion.bion.officelayer.filter.PDFFilter;
 import ag.ion.bion.officelayer.internal.application.ApplicationAssistant;
 import com.zparkingb.utils.ZApplicationFolder;
@@ -58,6 +59,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import junit.framework.TestCase;
 
@@ -141,12 +143,16 @@ public class OfficeBeanTest extends TestCase {
         configuration.put(IOfficeApplication.APPLICATION_PORT_KEY, String.valueOf(port));
         configuration.put(IOfficeApplication.APPLICATION_ARGUMENTS_KEY, String.valueOf(port));
         System.out.println("Office host: " + host);
+        
 
         try {
             System.out.println("Activating OpenOffice.org connection ...");
             final IOfficeApplication application = OfficeApplicationRuntime.getApplication(configuration);
             application.activate();
 
+                    Stream.of(IFilter.FILTERS).forEach(f->System.out.println(f));
+
+            
             System.out.println("Document stream to pdf..");
             application.getDocumentService().loadDocument(source.getAbsolutePath()).getPersistenceService().export(new FileOutputStream(target), PDFFilter.FILTER);
             System.out.println("Document export to pdf done. " + target.getCanonicalPath());

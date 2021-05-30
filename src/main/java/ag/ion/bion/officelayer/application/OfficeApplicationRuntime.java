@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * ubion.ORS - The Open Report Suite                                        *
  *                                                                          *
  * ------------------------------------------------------------------------ *
@@ -8,7 +8,7 @@
  *                                                                          *
  * The Contents of this file are made available subject to                  *
  * the terms of GNU Lesser General Public License Version 2.1.              *
- *                                                                          * 
+ *                                                                          *
  * GNU Lesser General Public License Version 2.1                            *
  * ======================================================================== *
  * Copyright 2003-2005 by IOn AG                                            *
@@ -31,7 +31,7 @@
  *  http://www.ion.ag                                                       *
  *  info@ion.ag                                                             *
  *                                                                          *
- ****************************************************************************/
+ *************************************************************************** */
 /*
  * Last changes made by $Author: andreas $, $Date: 2006-10-04 14:14:28 +0200 (Mi, 04 Okt 2006) $
  */
@@ -46,7 +46,7 @@ import java.util.Map;
 
 /**
  * Runtime for OpenOffice.org applications.
- * 
+ *
  * @author Andreas Bröker
  * @version $Revision: 10398 $
  */
@@ -54,6 +54,8 @@ public class OfficeApplicationRuntime {
 
     private static IApplicationAssistant applicationAssistant = null;
     private static IOfficeApplication officeApplication = null;
+    private static boolean initialised = false;
+    private static final Object lock = new Object();
 
     //----------------------------------------------------------------------------
     /**
@@ -96,44 +98,56 @@ public class OfficeApplicationRuntime {
      * @author Andreas Bröker
      */
     public static final IOfficeApplication getApplication(Map configuration) throws OfficeApplicationException {
-        if (configuration == null) {
-            throw new OfficeApplicationException("The submitted map is not valid.");
-        }
+        IOfficeApplication application;
+        initialised = false;
+        synchronized (lock) {
+            if (configuration == null) {
+                throw new OfficeApplicationException("The submitted map is not valid.");
+            }
 
-        Object type = configuration.get(IOfficeApplication.APPLICATION_TYPE_KEY);
-        if (type == null) {
-            throw new OfficeApplicationException("The application type is missing.");
-        }
+            Object type = configuration.get(IOfficeApplication.APPLICATION_TYPE_KEY);
+            if (type == null) {
+                throw new OfficeApplicationException("The application type is missing.");
+            }
 
-        if (type.toString().equals(IOfficeApplication.LOCAL_APPLICATION)) {
-            return new LocalOfficeApplication(configuration);
-        } else {
-            return new RemoteOfficeApplication(configuration);
+            if (type.toString().equals(IOfficeApplication.LOCAL_APPLICATION)) {
+                application = new LocalOfficeApplication(configuration);
+            }
+            else {
+                application = new RemoteOfficeApplication(configuration);
+            }
+            initialised = true;
         }
+        return application;
     }
 
     /**
      * Returns the default local office application.
      *
      * @return office application
+     *
      * @throws OfficeApplicationException if the office application can not be provided
      * @author Andreas Weber
      */
     public static IOfficeApplication getApplication() throws OfficeApplicationException {
-        
-        if (officeApplication!=null) return officeApplication;
-        
-        ILazyApplicationInfo appInfo = getApplicationAssistant().getLatestLocalLibreOfficeApplication();
-        if (appInfo == null) {
-            appInfo = getApplicationAssistant().getLatestLocalOpenOfficeOrgApplication();
+        initialised = false;
+
+        synchronized (lock) {
+            if (officeApplication == null) {
+
+                ILazyApplicationInfo appInfo = getApplicationAssistant().getLatestLocalLibreOfficeApplication();
+                if (appInfo == null) {
+                    appInfo = getApplicationAssistant().getLatestLocalOpenOfficeOrgApplication();
+                }
+
+                Map configuration = new HashMap();
+                configuration.put(IOfficeApplication.APPLICATION_HOME_KEY, appInfo.getHome());
+                configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
+
+                officeApplication = new LocalOfficeApplication(configuration);
+            }
+            initialised = true;
         }
-
-        Map configuration = new HashMap();
-        configuration.put(IOfficeApplication.APPLICATION_HOME_KEY, appInfo.getHome());
-        configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
-        
-        officeApplication = new LocalOfficeApplication(configuration);
-
         return officeApplication;
     }
 
@@ -146,13 +160,15 @@ public class OfficeApplicationRuntime {
      * @return office application assistant
      *
      * @throws OfficeApplicationException if the office application assistant can
-     * not be provided
+     *                                    not be provided
      *
      * @author Andreas Bröker
      */
     public static IApplicationAssistant getApplicationAssistant(String nativeLibPath) throws OfficeApplicationException {
-        if (applicationAssistant == null) {
-            applicationAssistant = new ApplicationAssistant(nativeLibPath);
+        synchronized (lock) {
+            if (applicationAssistant == null) {
+                applicationAssistant = new ApplicationAssistant(nativeLibPath);
+            }
         }
         return applicationAssistant;
     }
@@ -164,15 +180,22 @@ public class OfficeApplicationRuntime {
      * @return office application assistant
      *
      * @throws OfficeApplicationException if the office application assistant can
-     * not be provided
+     *                                    not be provided
      *
      * @author Andreas Bröker
      */
     public static IApplicationAssistant getApplicationAssistant() throws OfficeApplicationException {
-        if (applicationAssistant == null) {
-            applicationAssistant = new ApplicationAssistant(null);
+        synchronized (lock) {
+            if (applicationAssistant == null) {
+                applicationAssistant = new ApplicationAssistant(null);
+            }
         }
         return applicationAssistant;
     }
     //----------------------------------------------------------------------------
+
+    public static boolean isInitialised() {
+        return initialised;
+    }
+
 }
