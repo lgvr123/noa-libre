@@ -25,8 +25,7 @@ public class RetrieveOfficePathTest extends TestCase {
 
         try {
             System.out.println("Activating OpenOffice.org connection ...");
-            ILazyApplicationInfo appInfo;
-            appInfo = getApplicationAssistant().getLatestLocalLibreOfficeApplication();
+            ILazyApplicationInfo appInfo = getApplicationAssistant().getLatestLocalLibreOfficeApplication();
             
             System.out.println("Found "+appInfo.getWriterExecutable());
             
