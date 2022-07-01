@@ -140,11 +140,17 @@ public class OfficeApplicationRuntime {
                     appInfo = getApplicationAssistant().getLatestLocalOpenOfficeOrgApplication();
                 }
 
+                if (appInfo == null) {
+                    throw new OfficeApplicationException("Unable to find an OpenOffice program");
+                }
+
                 Map configuration = new HashMap();
                 configuration.put(IOfficeApplication.APPLICATION_HOME_KEY, appInfo.getHome());
                 configuration.put(IOfficeApplication.APPLICATION_TYPE_KEY, IOfficeApplication.LOCAL_APPLICATION);
 
                 officeApplication = new LocalOfficeApplication(configuration);
+                
+                
             }
             initialised = true;
         }

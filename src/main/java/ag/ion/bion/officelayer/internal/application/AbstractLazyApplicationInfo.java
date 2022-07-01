@@ -24,8 +24,10 @@
  */
 package ag.ion.bion.officelayer.internal.application;
 
+import ag.ion.bion.officelayer.OSHelper;
 import ag.ion.bion.officelayer.application.IApplicationProperties;
 import ag.ion.bion.officelayer.application.ILazyApplicationInfo;
+import java.io.File;
 
 /**
  * Abstract information provider of an office application.
@@ -39,6 +41,9 @@ public abstract class AbstractLazyApplicationInfo implements
 
     protected IApplicationProperties applicationProperties = null;
     protected String home = null;
+    protected String officepath = null;
+    protected String writerpath = null;
+    
     protected String productNameInProperties = null;
     protected int majorVersion = -1;
     protected int minorVersion = -1;
@@ -71,6 +76,31 @@ public abstract class AbstractLazyApplicationInfo implements
         this.applicationProperties = applicationProperties;
         this.productNameInProperties = productNameInProperties;
         initVersion(applicationProperties);
+        
+        String root = null;
+        if (OSHelper.IS_WINDOWS) {
+            root = home + File.separator + ApplicationAssistant.PROGRAM_FOLDER
+                    + File.separator;
+            this.officepath=root+ ApplicationAssistant.APPLICATION_EXECUTEABLE + ".exe";
+            this.writerpath=root+ ApplicationAssistant.WRITER_EXECUTEABLE + ".exe";
+
+        }
+        else if (OSHelper.IS_MAC) {
+            root = home + File.separator + ApplicationAssistant.PRE_PROGRAM_FOLDER_MAC
+                    + File.separator;
+            this.officepath=root+ ApplicationAssistant.PROGRAM_FOLDER + File.separator
+                    + ApplicationAssistant.APPLICATION_EXECUTEABLE + ".bin";
+            this.writerpath=root+ ApplicationAssistant.PROGRAM_FOLDER + File.separator
+                    + ApplicationAssistant.WRITER_EXECUTEABLE + ".bin";
+        }
+        else {
+            root = home + File.separator + ApplicationAssistant.PROGRAM_FOLDER
+                    + File.separator;
+            this.officepath=root+ ApplicationAssistant.APPLICATION_EXECUTEABLE + ".bin";
+            this.writerpath=root+ ApplicationAssistant.WRITER_EXECUTEABLE + ".bin";
+        }
+
+
     }
 
     // ----------------------------------------------------------------------------
@@ -101,6 +131,17 @@ public abstract class AbstractLazyApplicationInfo implements
         return home;
     }
 
+    @Override
+    public String getOfficeExecutable() {
+        return officepath;
+    }
+
+    @Override
+    public String getWriterExecutable() {
+        return writerpath;
+    }
+
+    
     // ----------------------------------------------------------------------------
     /**
      * Returns properties of the office application. The properties will be

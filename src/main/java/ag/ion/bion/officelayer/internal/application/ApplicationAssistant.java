@@ -56,12 +56,12 @@ public class ApplicationAssistant implements IApplicationAssistant {
     private static final String KEY_MAIN_PART_LIBRE_OFFICE = "LibreOffice"; //$NON-NLS-1$
     private static final String OPENOFFICE_ORG_OSX_APP = "OpenOffice.org.app"; //$NON-NLS-1$
     private static final String LIBREOFFICE_OSX_APP = "LibreOffice.app"; //$NON-NLS-1$
-    private static final String PRE_PROGRAM_FOLDER_MAC = "Contents"; //$NON-NLS-1$
-    private static final String PROGRAM_FOLDER = "program"; //$NON-NLS-1$
+    static final String PRE_PROGRAM_FOLDER_MAC = "Contents"; //$NON-NLS-1$
+    static final String PROGRAM_FOLDER = "program"; //$NON-NLS-1$
     private static final String RELATIVE_BOOTSTRAP = PROGRAM_FOLDER
             + File.separator + "bootstrap"; //$NON-NLS-1$ //$NON-NLS-2$
-    private static final String APPLICATION_EXECUTEABLE = "soffice"; //$NON-NLS-1$
-    private static final String WRITER_EXECUTEABLE = "swriter";
+    static final String APPLICATION_EXECUTEABLE = "soffice"; //$NON-NLS-1$
+    static final String WRITER_EXECUTEABLE = "swriter";
     private static final String VERSIONRC = PROGRAM_FOLDER + File.separator + "versionrc";
 
     // ----------------------------------------------------------------------------
@@ -338,7 +338,11 @@ public class ApplicationAssistant implements IApplicationAssistant {
                             path = WinRegistryHelper.readRegistry(registryKey, null);
                         }
                         if (path != null) {
+                            System.out.println("\tFound: "+path);
                             int position = path.indexOf(WRITER_EXECUTEABLE);
+                            if (position == -1) {
+                                position = path.indexOf(APPLICATION_EXECUTEABLE);
+                            }
                             if (position != -1) {
                                 path = path.substring(1, position - 9);
                                 ILazyApplicationInfo applicationInfo = findLocalApplicationInfo(path);
@@ -360,6 +364,9 @@ public class ApplicationAssistant implements IApplicationAssistant {
                                         arrayList.add(applicationInfo);
                                     }
                                 }
+                            } 
+                            else { 
+                                System.out.println("\tBut could neither find '"+WRITER_EXECUTEABLE+"' nor '"+APPLICATION_EXECUTEABLE+"'");
                             }
                         }
                     }
@@ -672,6 +679,7 @@ public class ApplicationAssistant implements IApplicationAssistant {
         ArrayList arrayList = new ArrayList();
 //        arrayList.add("SOFTWARE\\" + keyMainPart + "\\" + keyMainPart );
         arrayList.add("SOFTWARE\\Classes\\"+keyMainPart+".WriterDocument.1\\shell\\open\\command");
+        arrayList.add(keyMainPart+".WriterDocument.1\\shell\\open\\command"); // For Office 7
         return (String[]) arrayList.toArray(new String[arrayList.size()]);
     }
 

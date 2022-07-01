@@ -94,6 +94,19 @@ public class LazyApplicationInfo implements ILazyApplicationInfo {
         return home;
     }
 
+    @Override
+    @Deprecated
+    public String getOfficeExecutable() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    @Deprecated
+    public String getWriterExecutable() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    
     //----------------------------------------------------------------------------
     /**
      * Returns properties of the office application. The properties will be

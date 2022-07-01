@@ -52,7 +52,7 @@ public class WinRegistryHelper {
             else {
                 query.append(" /reg:64 ");
             }
-            System.out.println(query);
+            System.out.println(query); //FIXME use logger
             Process process = Runtime.getRuntime().exec(query.toString());
             InputStream is = process.getInputStream();
             StringBuilder sw = new StringBuilder();

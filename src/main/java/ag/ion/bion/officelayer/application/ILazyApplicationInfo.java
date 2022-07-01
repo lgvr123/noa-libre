@@ -62,6 +62,26 @@ public interface ILazyApplicationInfo {
 
   //----------------------------------------------------------------------------
   /**
+   * Returns file path to the office *executable*.
+   * 
+   * @return home of the office application
+   * 
+   * @author Laurent van Roy
+   */
+  public String getOfficeExecutable();
+
+  //----------------------------------------------------------------------------
+  /**
+   * Returns file path to the writer *executable*.
+   * 
+   * @return home of the writer *executable*
+   * 
+   * @author Laurent van Roy
+   */
+  public String getWriterExecutable();
+
+  //----------------------------------------------------------------------------
+  /**
    * Returns properties of the office application. The properties
    * will be invetigated from the bootstrap.ini file. Returns null
    * if the properties are not available.
